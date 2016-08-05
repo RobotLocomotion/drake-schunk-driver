@@ -56,6 +56,9 @@ class WsgCommandMessage {
       : command_(command),
         payload_(payload) {}
 
+  int command() const { return command_; }
+  const std::vector<unsigned char> payload() const { return payload_; }
+
   void Serialize(std::vector<unsigned char>& buffer) const {
     buffer.resize(payload_.size() + 8);
     buffer[0] = 0xaa;

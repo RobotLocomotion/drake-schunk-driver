@@ -36,7 +36,9 @@ class Wsg {
         break;
       }
       response = rx_.Receive();
-      // TODO(ggould-tri) discard received that don't match command?
+      if (response && (response->command() != command.command())) {
+        response.reset(nullptr);  // Throw away irrelevant message.
+      }
     }
     return(response);
   }
