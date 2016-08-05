@@ -12,7 +12,6 @@
 
 #include <vector>
 
-#include "defaults.h"
 #include "wsg_return_message.h"
 
 namespace schunk_driver {
@@ -38,10 +37,6 @@ class WsgReturnReceiver {
       assert(bind_result == 0);
     }
   }
-
-  WsgReturnReceiver()
-      : WsgReturnReceiver(nullptr, kLocalPort, kGripperAddrStr, kGripperPort)
-  {}
 
   ~WsgReturnReceiver() { close(fd_); }
 

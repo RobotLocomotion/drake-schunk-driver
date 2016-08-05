@@ -11,7 +11,6 @@
 #include <unistd.h>
 
 #include <vector>
-
 #include "defaults.h"
 #include "wsg_command_message.h"
 
@@ -31,19 +30,7 @@ class WsgCommandSender {
                 .sin_port = htons(gripper_port),
                 .sin_addr = { inet_addr(gripper_addr) }}) {
     assert(fd_ > 0);
-#if 0
-    int bind_result = bind(fd_, (struct sockaddr *) &local_sockaddr_,
-                           sizeof(struct sockaddr_in));
-    if (bind_result != 0) {
-      std::cerr << "bind failed: " << errno << std::endl;
-      assert(bind_result == 0);
-    }
-#endif
   }
-
-  WsgCommandSender()
-      : WsgCommandSender(nullptr, kLocalPort, kGripperAddrStr, kGripperPort)
-  {}
 
   ~WsgCommandSender() { close(fd_); }
 

@@ -3,7 +3,8 @@
 CCS = demo.cc
 HS = crc.h \
      wsg_command_sender.h wsg_command_message.h \
-     wsg_return_message.h wsg_return_receiver.h
+     wsg_return_message.h wsg_return_receiver.h \
+     wsg.h
 
 BINDIR = bin
 
