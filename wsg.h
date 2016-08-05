@@ -36,11 +36,22 @@ class Wsg {
         break;
       }
       response = rx_.Receive();
-      if (response && (response->command() != command.command())) {
-        response.reset(nullptr);  // Throw away irrelevant message.
+      if (response) {
+        if (response->command() != command.command()) {
+          response.reset(nullptr);  // Throw away irrelevant message.
+        } else if (response->status() == E_CMD_PENDING) {
+          response.reset(nullptr);  // Wait for a final status message.
+        }
       }
     }
     return(response);
+  }
+
+  enum HomeDirection { kDefault, kPositive, kNegative };
+  bool Home(HomeDirection dir) {
+    WsgCommandMessage command(schunk_driver::kHome, {dir});
+    auto response = SendAndAwaitResponse(command, 4);
+    return response && (response->status() == E_SUCCESS);
   }
 
  private:
