@@ -12,14 +12,10 @@
 
 #include <vector>
 
+#include "defaults.h"
 #include "wsg_command_message.h"
 
 namespace schunk_driver {
-
-// Device preconfigured defaults:
-const static in_port_t kLocalPort = 1501;
-const static in_port_t kGripperPort = 1500;
-const static char* kGripperAddrStr = "192.168.1.20";
 
 class WsgCommandSender {
  public:
@@ -33,8 +29,7 @@ class WsgCommandSender {
                               : INADDR_ANY }}),
         gripper_sockaddr_({.sin_family = AF_INET,
                 .sin_port = htons(gripper_port),
-                .sin_addr = { inet_addr(gripper_addr) }})
-  {
+                .sin_addr = { inet_addr(gripper_addr) }}) {
     assert(fd_ > 0);
 #if 0
     int bind_result = bind(fd_, (struct sockaddr *) &local_sockaddr_,
@@ -52,21 +47,20 @@ class WsgCommandSender {
 
   ~WsgCommandSender() { close(fd_); }
 
-  void send(const WsgCommandMessage& msg) {
+  void Send(const WsgCommandMessage& msg) {
     std::vector<unsigned char> data_to_send;
     msg.Serialize(data_to_send);
     for (const auto& c : data_to_send) {
       std::cout << std::setw(2) << std::setfill('0') << std::hex
                 << static_cast<int>(c);
     }
-    std::cout << std::endl;
     size_t send_result = sendto(fd_,
                                 data_to_send.data(), data_to_send.size(),
                                 0,
                                 (struct sockaddr *) &gripper_sockaddr_,
                                 sizeof(struct sockaddr_in));
     assert(send_result == data_to_send.size());
-    std::cout << "sent!" << std::endl;
+    std::cout << "  sent!" << std::endl;
   }
 
  private:

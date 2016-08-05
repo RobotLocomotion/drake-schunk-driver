@@ -1,7 +1,9 @@
 # Trivial Makefile for Schunk driver.
 
 CCS = demo.cc
-HS = wsg_command_sender.h wsg_command_message.h
+HS = crc.h \
+     wsg_command_sender.h wsg_command_message.h \
+     wsg_return_message.h wsg_return_receiver.h
 
 BINDIR = bin
 
