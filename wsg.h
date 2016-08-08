@@ -54,6 +54,15 @@ class Wsg {
     return response && (response->status() == E_SUCCESS);
   }
 
+  bool Grasp(float width_mm, float speed_mm_per_s) {
+    std::vector<unsigned char> params(8);
+    memcpy(params.data(), &width_mm, sizeof(float));
+    memcpy(params.data() + sizeof(float), &speed_mm_per_s, sizeof(float));
+    WsgCommandMessage command(schunk_driver::kGrasp, params);
+    auto response = SendAndAwaitResponse(command, 6);
+    return response && (response->status() == E_SUCCESS);
+  }
+
  private:
   WsgReturnReceiver rx_;
   WsgCommandSender tx_;
