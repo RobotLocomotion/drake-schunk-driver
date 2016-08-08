@@ -1,6 +1,7 @@
 #pragma once
 
 #include <chrono>
+#include <cstring>
 
 #include "defaults.h"
 #include "wsg_command_message.h"
