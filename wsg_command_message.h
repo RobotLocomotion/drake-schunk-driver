@@ -50,6 +50,9 @@ class WsgCommandMessage {
       : command_(command),
         payload_(payload) {}
 
+  template<typename T>
+  void AppendToPayload(const T& new_item);
+
   int command() const { return command_; }
   const std::vector<unsigned char> payload() const { return payload_; }
 
@@ -57,7 +60,7 @@ class WsgCommandMessage {
 
  private:
   const int command_;
-  const std::vector<unsigned char> payload_;
+  std::vector<unsigned char> payload_;
 };
 
 }  // namespace schunk_driver

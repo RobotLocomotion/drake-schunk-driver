@@ -10,7 +10,7 @@ int main(int argc, char** argv) {
   assert(wsg.Home(schunk_driver::Wsg::kNegative));
   assert(wsg.Home(schunk_driver::Wsg::kPositive));
 
-  assert(wsg.Grasp(62, 200));
+  //assert(wsg.Grasp(62, 200));
 
   return 0;
 }

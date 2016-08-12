@@ -21,4 +21,16 @@ void WsgCommandMessage::Serialize(std::vector<unsigned char>& buffer) const {
   buffer[payload_.size() + 7] = (crc >> 8) & 0xFF;
 }
 
+template <typename T>
+void WsgCommandMessage::AppendToPayload(const T& new_item) {
+  size_t old_size = payload_.size();
+  payload_.resize(old_size + sizeof(T));
+  memcpy(payload_.data() + old_size, &new_item, sizeof(T));
+}
+
+template void WsgCommandMessage::AppendToPayload(const unsigned char& new_item);
+template void WsgCommandMessage::AppendToPayload(const uint16_t& new_item);
+template void WsgCommandMessage::AppendToPayload(const uint32_t& new_item);
+template void WsgCommandMessage::AppendToPayload(const float& new_item);
+
 }  // namespace schunk_driver

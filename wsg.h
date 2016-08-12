@@ -1,7 +1,9 @@
 #pragma once
 
+#include <cassert>
 #include <chrono>
 #include <cstring>
+#include <iostream>
 
 #include "defaults.h"
 #include "wsg_command_message.h"
@@ -27,6 +29,8 @@ class Wsg {
   std::unique_ptr<WsgReturnMessage> SendAndAwaitResponse(
       const WsgCommandMessage& command,
       double timeout) {
+    std::cout << "sending " << command.command()
+              << " and awaiting for " << timeout << " seconds." << std::endl;
     auto start_time = std::chrono::system_clock::now();
     tx_.Send(command);
     std::unique_ptr<WsgReturnMessage> response(nullptr);
@@ -55,6 +59,15 @@ class Wsg {
     return response && (response->status() == E_SUCCESS);
   }
 
+  bool Tare() {
+    WsgCommandMessage command(schunk_driver::kTareForceSensor, {});
+    auto response = SendAndAwaitResponse(command, 4);
+    // Allow E_NOT_AVAILABLE because it is not clear in the docs if the
+    // internal current-based force sensor counts or not.
+    return response && ((response->status() == E_SUCCESS) ||
+                        (response->status() == E_NOT_AVAILABLE));
+  }
+
   bool Grasp(float width_mm, float speed_mm_per_s) {
     std::vector<unsigned char> params(8);
     memcpy(params.data(), &width_mm, sizeof(float));
@@ -63,6 +76,21 @@ class Wsg {
     auto response = SendAndAwaitResponse(command, 6);
     return response && (response->status() == E_SUCCESS);
   }
+
+  /// All of the GetWhatever commands have the same payload format, so this
+  /// convenience function will update any of them to kUpdatePeriodMs.
+  void TurnOnUpdates(Command command,
+                     uint16_t update_period_ms, double timeout) {
+    std::vector<unsigned char> payload;
+    WsgCommandMessage message(command, payload);
+    // Here, 1 == always send automatic updates.
+    message.AppendToPayload(static_cast<unsigned char>(1));
+    message.AppendToPayload(update_period_ms);
+    assert(SendAndAwaitResponse(message, timeout));
+  }
+
+  WsgReturnReceiver& rx() { return rx_; }
+  WsgCommandSender& tx() { return tx_; }
 
  private:
   WsgReturnReceiver rx_;

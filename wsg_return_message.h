@@ -66,6 +66,18 @@ typedef enum {
   SF_REFERENCED         = 1 << 0,
 } StateFlag;
 
+/// Grasping states; for definitions see the command set reference.
+typedef enum {
+  kIdle = 0,
+  kGrasping = 1,
+  kNoPartFound = 2,
+  kPartLost = 3,
+  kHolding = 4,
+  kReleasing = 5,
+  kPositioning = 6,
+  kError = 7
+} GraspingState;
+
 
 class WsgReturnMessage {
  public:

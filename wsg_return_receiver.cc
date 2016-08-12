@@ -50,7 +50,8 @@ std::unique_ptr<WsgReturnMessage> WsgReturnReceiver::Receive() {
     if ((errno == EAGAIN) || (errno == EWOULDBLOCK)) {
       return std::unique_ptr<WsgReturnMessage>(nullptr);
     } else {
-      std::cerr << "Error reading from UDP socket" << std::endl;
+      std::cerr << "Error reading from UDP socket" << errno
+                << " " << strerror(errno) << std::endl;
       assert(read_size >= 0);
     }
   } else if (read_size == sizeof(buffer)) {
@@ -59,11 +60,6 @@ std::unique_ptr<WsgReturnMessage> WsgReturnReceiver::Receive() {
   } else {
     std::vector<unsigned char> message_buffer(read_size);
     memcpy(message_buffer.data(), buffer, read_size);
-    for (const auto& c : message_buffer) {
-      std::cout << std::setw(2) << std::setfill('0') << std::hex
-                << static_cast<int>(c);
-    }
-    std::cout << "  received!" << std::endl;
     return WsgReturnMessage::Parse(message_buffer);
   }
 }
