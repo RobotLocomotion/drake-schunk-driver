@@ -52,13 +52,18 @@ class Wsg {
     return(response);
   }
 
+  /// Directions the wsg can "home" in.  Positive/Default are outward.
   enum HomeDirection { kDefault, kPositive, kNegative };
+
+  /** Issues a Home (move to an extreme and calibrate there) command.
+   * This command blocks until the move is complete. */
   bool Home(HomeDirection dir) {
     WsgCommandMessage command(schunk_driver::kHome, {dir});
     auto response = SendAndAwaitResponse(command, 4);
     return response && (response->status() == E_SUCCESS);
   }
 
+  /** Tares the force meter (sets the current force as "zero"). */
   bool Tare() {
     WsgCommandMessage command(schunk_driver::kTareForceSensor, {});
     auto response = SendAndAwaitResponse(command, 4);
@@ -68,6 +73,9 @@ class Wsg {
                         (response->status() == E_NOT_AVAILABLE));
   }
 
+  /** Issues a Grasp command to the gripper.
+   *
+   * This command blocks until the move is complete. */
   bool Grasp(float width_mm, float speed_mm_per_s) {
     std::vector<unsigned char> params(8);
     memcpy(params.data(), &width_mm, sizeof(float));
@@ -77,8 +85,12 @@ class Wsg {
     return response && (response->status() == E_SUCCESS);
   }
 
-  /// All of the GetWhatever commands have the same payload format, so this
-  /// convenience function will update any of them to kUpdatePeriodMs.
+  /** Sets update rate for any recurring status message.
+   * All of the GetWhatever commands have the same payload format, so this
+   * convenience function will update any of them to kUpdatePeriodMs.
+   *
+   * This command blocks (for about @p update_period_ms) until the
+   * configuration is complete and a message has been received. */
   void TurnOnUpdates(Command command,
                      uint16_t update_period_ms, double timeout) {
     std::vector<unsigned char> payload;
