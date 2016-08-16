@@ -34,17 +34,21 @@ WsgCommandSender::~WsgCommandSender() { close(fd_); }
 void WsgCommandSender::Send(const WsgCommandMessage& msg) {
   std::vector<unsigned char> data_to_send;
   msg.Serialize(data_to_send);
+#ifdef DEBUG
   for (const auto& c : data_to_send) {
     std::cout << std::setw(2) << std::setfill('0') << std::hex
               << static_cast<int>(c);
   }
+#endif
   size_t send_result = sendto(fd_,
                               data_to_send.data(), data_to_send.size(),
                               0,
                               (struct sockaddr *) &gripper_sockaddr_,
                               sizeof(struct sockaddr_in));
   assert(send_result == data_to_send.size());
+#ifdef DEBUG
   std::cout << "  sent!" << std::endl;
+#endif
 }
 
 }  // namespace schunk_driver

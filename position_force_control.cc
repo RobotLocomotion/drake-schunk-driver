@@ -20,7 +20,6 @@ PositionForceControl::PositionForceControl(std::unique_ptr<Wsg> wsg)
 
 
 StatusCode PositionForceControl::DoCalibrationSteps() {
-
   // Set up periodic status updates on every available state structure.
   // We don't use all of these but we have bandwidth to spare and this
   // ensures we'll have them available in pcap debugging.
@@ -35,29 +34,24 @@ StatusCode PositionForceControl::DoCalibrationSteps() {
   wsg_->Home(Wsg::kPositive);
   wsg_->Tare();
 
+  // Get physical limits.
+  physical_limits_ = wsg_->GetPhysicalLimits();
+
   // Set all limits to their maxima.
-  
+  wsg_->ClearSoftLimits();
+  wsg_->SetAcceleration(physical_limits_.max_acc_mm_per_ss);
 }
 
 
 void PositionForceControl::SetPositionAndForce(
     double position_mm, double force) {
-  // TODO(ggould-tri) The logic below to reverse-engineer position/force
-  // control out of the Schunk is probably not valid for picking up squishy
-  // objects like baloons or muffins.  However the documentation of the Schunk
-  // doesn't give me any good ideas for how to do better.
-
-  // If the gripper is in motion, send a stop command.
-  
-  // Set the maximum force to the commanded force.
-  
-  // If the target position is narrower than the current position, use a Grasp
-  // command.  It may fail if there is no object to grasp, but it will still
-  // attain the target position in doing so.
-  
-  // If the target position is wider than the current position, use a
-  // Preposition command.
-  
+  // Use the preposition command (which is SPECIFICALLY NOT INTENDED for this
+  // use case) to emulate force control.
+  wsg_->SetForceLimit(force);
+  wsg_->Stop();
+  wsg_->PrepositionNonblocking(
+      Wsg::kPrepositionClampOnBlock, Wsg::kPrepositionAbsolute,
+      position_mm, physical_limits_.max_speed_mm_per_s);
 }
 
 

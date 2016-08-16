@@ -13,7 +13,20 @@
 
 namespace schunk_driver {
 
-/// A convenience class for sending and receiving WSG messages.
+struct PhysicalLimits {
+  float stroke_mm;
+  float min_speed_mm_per_s;
+  float max_speed_mm_per_s;
+  float min_acc_mm_per_ss;
+  float max_acc_mm_per_ss;
+  float min_force;
+  float nominal_force;
+  float overdrive_force;
+};
+
+/// A convenience class for sending and receiving WSG messages.  There is no
+/// guiding principle to the methods here; it is just the methods we happened
+/// to need during development.
 class Wsg {
  public:
   Wsg(const char* local_addr, in_port_t local_port,
@@ -29,8 +42,10 @@ class Wsg {
   std::unique_ptr<WsgReturnMessage> SendAndAwaitResponse(
       const WsgCommandMessage& command,
       double timeout) {
+#ifdef DEBUG
     std::cout << "sending " << command.command()
               << " and awaiting for " << timeout << " seconds." << std::endl;
+#endif
     auto start_time = std::chrono::system_clock::now();
     tx_.Send(command);
     std::unique_ptr<WsgReturnMessage> response(nullptr);
@@ -46,10 +61,36 @@ class Wsg {
           response.reset(nullptr);  // Throw away irrelevant message.
         } else if (response->status() == E_CMD_PENDING) {
           response.reset(nullptr);  // Wait for a final status message.
+        } else {
+          if (response->status() != E_SUCCESS) {
+            std::cerr << "Non-success response "
+                      << response->status() << std::endl;
+          }
         }
       }
     }
     return(response);
+  }
+
+  /// Issues a stop command and does not await a response.
+  void Stop() {
+    tx_.Send(WsgCommandMessage(kStop, {}));
+  }
+
+  PhysicalLimits GetPhysicalLimits() {
+    auto limits_msg = SendAndAwaitResponse(
+      WsgCommandMessage(kGetSystemLimits, {}), 0.1);
+    PhysicalLimits result;
+    auto limits_data = limits_msg->params().data();
+    memcpy(&result.stroke_mm, limits_data + 0, sizeof(float));
+    memcpy(&result.min_speed_mm_per_s, limits_data + 4, sizeof(float));
+    memcpy(&result.max_speed_mm_per_s, limits_data + 8, sizeof(float));
+    memcpy(&result.min_acc_mm_per_ss, limits_data + 12, sizeof(float));
+    memcpy(&result.max_acc_mm_per_ss, limits_data + 16, sizeof(float));
+    memcpy(&result.min_force, limits_data + 20, sizeof(float));
+    memcpy(&result.nominal_force, limits_data + 24, sizeof(float));
+    memcpy(&result.overdrive_force, limits_data + 28, sizeof(float));
+    return result;
   }
 
   /// Directions the wsg can "home" in.  Positive/Default are outward.
@@ -58,14 +99,14 @@ class Wsg {
   /** Issues a Home (move to an extreme and calibrate there) command.
    * This command blocks until the move is complete. */
   bool Home(HomeDirection dir) {
-    WsgCommandMessage command(schunk_driver::kHome, {dir});
+    WsgCommandMessage command(kHome, {dir});
     auto response = SendAndAwaitResponse(command, 4);
     return response && (response->status() == E_SUCCESS);
   }
 
   /** Tares the force meter (sets the current force as "zero"). */
   bool Tare() {
-    WsgCommandMessage command(schunk_driver::kTareForceSensor, {});
+    WsgCommandMessage command(kTareForceSensor, {});
     auto response = SendAndAwaitResponse(command, 4);
     // Allow E_NOT_AVAILABLE because it is not clear in the docs if the
     // internal current-based force sensor counts or not.
@@ -76,13 +117,70 @@ class Wsg {
   /** Issues a Grasp command to the gripper.
    *
    * This command blocks until the move is complete. */
-  bool Grasp(float width_mm, float speed_mm_per_s) {
-    std::vector<unsigned char> params(8);
-    memcpy(params.data(), &width_mm, sizeof(float));
-    memcpy(params.data() + sizeof(float), &speed_mm_per_s, sizeof(float));
-    WsgCommandMessage command(schunk_driver::kGrasp, params);
+  bool Grasp(double width_mm, double speed_mm_per_s) {
+    WsgCommandMessage command(kGrasp, {});
+    command.AppendToPayload(static_cast<float>(width_mm));
+    command.AppendToPayload(static_cast<float>(speed_mm_per_s));
     auto response = SendAndAwaitResponse(command, 6);
     return response && (response->status() == E_SUCCESS);
+  }
+
+  bool SetForceLimit(double force) {
+    WsgCommandMessage command(kSetForceLimit, {});
+    command.AppendToPayload(static_cast<float>(force));
+    SendAndAwaitResponse(command, 0.1);
+  }
+
+  bool SetAcceleration(double acceleration_mm_per_ss) {
+    WsgCommandMessage command(kSetAccel, {});
+    command.AppendToPayload(static_cast<float>(acceleration_mm_per_ss));
+    SendAndAwaitResponse(command, 0.1);
+  }
+
+  bool ClearSoftLimits() {
+    SendAndAwaitResponse(WsgCommandMessage(kClearSoftLimits, {}), 0.1);
+  }
+
+  enum PrepositionStopMode {kPrepositionClampOnBlock = 0,
+                            kPrepositionStopOnBlock = 1};
+  enum PrepositionMoveMode {kPrepositionAbsolute = 0,
+                            kPrepositionRelative = 2};
+
+  /** Issues a Preposition command to the gripper.
+   *
+   * This command blocks until the move is complete. */
+  bool Preposition(PrepositionStopMode stop_mode, PrepositionMoveMode move_mode,
+                   float width_mm, float speed_mm_per_s) {
+    WsgCommandMessage command = PrepositionCommand(
+        stop_mode, move_mode, width_mm, speed_mm_per_s);
+    auto response = SendAndAwaitResponse(command, 6);
+    return response && (response->status() == E_SUCCESS);
+  }
+
+  /** Issues a Preposition command to the gripper.
+   *
+   * This command does not block. */
+  void PrepositionNonblocking(
+      PrepositionStopMode stop_mode, PrepositionMoveMode move_mode,
+      float width_mm, float speed_mm_per_s) {
+    WsgCommandMessage command = PrepositionCommand(
+        stop_mode, move_mode, width_mm, speed_mm_per_s);
+#ifdef DEBUG
+    std::cout << "sending " << command.command() << " nonblocking" << std::endl;
+#endif
+    auto start_time = std::chrono::system_clock::now();
+    tx_.Send(command);
+  }
+
+  WsgCommandMessage PrepositionCommand(
+      PrepositionStopMode stop_mode, PrepositionMoveMode move_mode,
+      double width_mm, double speed_mm_per_s) {
+    WsgCommandMessage command(kPrePosition, {});
+    unsigned char flags = stop_mode | move_mode;
+    command.AppendToPayload(flags);
+    command.AppendToPayload(static_cast<float>(width_mm));
+    command.AppendToPayload(static_cast<float>(speed_mm_per_s));
+    return command;
   }
 
   /** Sets update rate for any recurring status message.

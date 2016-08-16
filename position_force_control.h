@@ -59,6 +59,8 @@ class PositionForceControl {
   double target_force_;
   double last_position_mm_;
   double last_applied_force_;
+
+  PhysicalLimits physical_limits_;
 };
 
 }
