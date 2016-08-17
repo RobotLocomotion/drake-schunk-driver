@@ -47,6 +47,11 @@ void PositionForceControl::SetPositionAndForce(
     double position_mm, double force) {
   // Use the preposition command (which is SPECIFICALLY NOT INTENDED for this
   // use case) to emulate force control.
+
+  // TODO(ggould-tri) do not recommand if new values are within epsilon of
+  // currently commanded values.
+
+  // TODO(ggould-tri) adjust acceleration limit to some multiple of force.
   wsg_->SetForceLimit(force);
   wsg_->Stop();
   wsg_->PrepositionNonblocking(
