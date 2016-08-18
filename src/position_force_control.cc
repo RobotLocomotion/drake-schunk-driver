@@ -85,9 +85,14 @@ void PositionForceControl::Task() {
       }
       case kGetForce: {
         float force_float;
-        memcpy(&force_float, msg->params().data(),
-               sizeof(force_float));
+        memcpy(&force_float, msg->params().data(), sizeof(force_float));
         last_applied_force_ = force_float;
+        break;
+      }
+      case kGetSpeed: {
+        float speed_float;
+        memcpy(&speed_float, msg->params().data(), sizeof(speed_float));
+        last_speed_mm_per_s_ = speed_float;
         break;
       }
       default: break;  // Discard uninteresting messages.
@@ -98,5 +103,6 @@ void PositionForceControl::Task() {
 
 double PositionForceControl::position_mm() { return last_position_mm_; }
 double PositionForceControl::force() { return last_applied_force_; }
+double PositionForceControl::speed_mm_per_s() { return last_speed_mm_per_s_; }
 
 } // namespace schunk_driver

@@ -39,6 +39,9 @@ class PositionForceControl {
   /// Get the current position (in millimeters of base separation).
   double position_mm();
 
+  /// Get the current speed (in millimeters per second).
+  double speed_mm_per_s();
+
   /// Get the current applied force.  This is the force in Newtons applied by
   /// a grasped object to the gripper, positive outward, and so will be near
   /// zero when the fingers are in motion regardless of the (considerable)
@@ -59,6 +62,7 @@ class PositionForceControl {
   double target_force_;
   double last_position_mm_;
   double last_applied_force_;
+  double last_speed_mm_per_s_;
 
   PhysicalLimits physical_limits_;
 };
