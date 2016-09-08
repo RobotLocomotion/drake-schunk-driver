@@ -6,4 +6,5 @@ struct lcmt_schunk_command
 
   double target_position_mm;
   double force;
+  double target_speed_mm_per_s;
 }

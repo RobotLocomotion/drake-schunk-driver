@@ -11,6 +11,8 @@
 #include "wsg_return_message.h"
 #include "wsg_return_receiver.h"
 
+#define DEBUG
+
 namespace schunk_driver {
 
 struct PhysicalLimits {
