@@ -13,7 +13,13 @@ add_lcmtype(lcmt_schunk_status.lcm)
 #		     [CPP_AGGREGATE_HEADER header_fname]
 #                    [JARNAME jar_name])
 
-lcmtypes_build()
+lcmtypes_build(C_AGGREGATE_HEADER lcm_wsg_c
+               CPP_AGGREGATE_HEADER lcm_wsg_cpp
+               C_LIBNAME wsg_lcmtypes_c
+               JARNAME wsg_lcmtypes_java)
+
+INSTALL(TARGETS ${LCMTYPES_C_LIBRARY}
+        DESTINATION "lib")
 
 set(wsg_files)
 list(APPEND wsg_files
