@@ -20,7 +20,6 @@ PositionControl::PositionControl(std::unique_ptr<Wsg> wsg, float initial_force_l
   wsg_->SetForceLimit(initial_force_limit);
   
   // Home the fingers (to calibrate extents) and tare the sensors.
-  wsg_->Home(Wsg::kNegative);
   wsg_->Home(Wsg::kPositive);
   wsg_->Tare();
 

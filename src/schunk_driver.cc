@@ -57,6 +57,7 @@ void * report_status(void *thread_id)
 
     double now = getUnixTime();
     if (now - last_send > kSendPeriod){
+      last_send = now;
       printf("Pos: %2.2f, Force: %2.2f\n", pc->position_mm(), pc->force());
    
       schunk_driver::lcmt_schunk_status msg;
