@@ -52,6 +52,9 @@ void PositionForceControl::SetPositionAndForce(
   // Use the preposition command (which is SPECIFICALLY NOT INTENDED for this
   // use case) to emulate force control.
 
+  // TODO(ggould-tri) consider using grip command when motion is inward; this
+  // is more correct but probably requires handling many more result statuses.
+
   // Do not recommand if new values are within epsilon of currently commanded
   // values, in order to avoid unnecessary Stop commands and resulting delay,
   // jerkiness, noise, and heat.
