@@ -1,6 +1,7 @@
 #include "position_force_control.h"
 
 #include <cassert>
+#include <cmath>
 #include <cstring>
 
 #include "wsg.h"
@@ -14,6 +15,9 @@ namespace schunk_driver {
 
 const static uint16_t kUpdatePeriodMs = 5;
 const static double kUpdateAdjustTimeout = 0.25;
+
+const static double kForceDeadband = 5;
+const static double kPositionDeadbandMm = 5;
 
 PositionForceControl::PositionForceControl(std::unique_ptr<Wsg> wsg)
     : wsg_(std::move(wsg)) {}
@@ -39,7 +43,7 @@ StatusCode PositionForceControl::DoCalibrationSteps() {
 
   // Set all limits to their maxima.
   wsg_->ClearSoftLimits();
-  wsg_->SetAcceleration(physical_limits_.max_acc_mm_per_ss);
+  wsg_->SetAcceleration(physical_limits_.max_acc_mm_per_ss_);
 }
 
 
@@ -48,15 +52,22 @@ void PositionForceControl::SetPositionAndForce(
   // Use the preposition command (which is SPECIFICALLY NOT INTENDED for this
   // use case) to emulate force control.
 
-  // TODO(ggould-tri) do not recommand if new values are within epsilon of
-  // currently commanded values.
+  // Do not recommand if new values are within epsilon of currently commanded
+  // values, in order to avoid unnecessary Stop commands and resulting delay,
+  // jerkiness, noise, and heat.
+  if ((std::abs(force - current_target_force_) < kForceDeadband) &&
+      (std::abs(position_mm - current_target_pos_mm_) < kPositionDeadbandMm)) {
+    return;
+  }
 
   // TODO(ggould-tri) adjust acceleration limit to some multiple of force.
   wsg_->SetForceLimit(force);
   wsg_->Stop();
   wsg_->PrepositionNonblocking(
       Wsg::kPrepositionClampOnBlock, Wsg::kPrepositionAbsolute,
-      position_mm, physical_limits_.max_speed_mm_per_s);
+      position_mm, physical_limits_.max_speed_mm_per_s_);
+  current_target_force_ = force;
+  current_target_pos_mm_ = position_mm;
 }
 
 

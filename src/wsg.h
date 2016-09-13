@@ -14,14 +14,14 @@
 namespace schunk_driver {
 
 struct PhysicalLimits {
-  float stroke_mm;
-  float min_speed_mm_per_s;
-  float max_speed_mm_per_s;
-  float min_acc_mm_per_ss;
-  float max_acc_mm_per_ss;
-  float min_force;
-  float nominal_force;
-  float overdrive_force;
+  float stroke_mm_ {0};
+  float min_speed_mm_per_s_ {0};
+  float max_speed_mm_per_s_ {0};
+  float min_acc_mm_per_ss_ {0};
+  float max_acc_mm_per_ss_ {0};
+  float min_force_ {0};
+  float nominal_force_ {0};
+  float overdrive_force_ {0};
 };
 
 /// A convenience class for sending and receiving WSG messages.  There is no
@@ -82,14 +82,14 @@ class Wsg {
       WsgCommandMessage(kGetSystemLimits, {}), 0.1);
     PhysicalLimits result;
     auto limits_data = limits_msg->params().data();
-    memcpy(&result.stroke_mm, limits_data + 0, sizeof(float));
-    memcpy(&result.min_speed_mm_per_s, limits_data + 4, sizeof(float));
-    memcpy(&result.max_speed_mm_per_s, limits_data + 8, sizeof(float));
-    memcpy(&result.min_acc_mm_per_ss, limits_data + 12, sizeof(float));
-    memcpy(&result.max_acc_mm_per_ss, limits_data + 16, sizeof(float));
-    memcpy(&result.min_force, limits_data + 20, sizeof(float));
-    memcpy(&result.nominal_force, limits_data + 24, sizeof(float));
-    memcpy(&result.overdrive_force, limits_data + 28, sizeof(float));
+    memcpy(&result.stroke_mm_, limits_data + 0, sizeof(float));
+    memcpy(&result.min_speed_mm_per_s_, limits_data + 4, sizeof(float));
+    memcpy(&result.max_speed_mm_per_s_, limits_data + 8, sizeof(float));
+    memcpy(&result.min_acc_mm_per_ss_, limits_data + 12, sizeof(float));
+    memcpy(&result.max_acc_mm_per_ss_, limits_data + 16, sizeof(float));
+    memcpy(&result.min_force_, limits_data + 20, sizeof(float));
+    memcpy(&result.nominal_force_, limits_data + 24, sizeof(float));
+    memcpy(&result.overdrive_force_, limits_data + 28, sizeof(float));
     return result;
   }
 

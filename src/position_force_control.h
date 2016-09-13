@@ -55,15 +55,21 @@ class PositionForceControl {
  private:
   std::unique_ptr<Wsg> wsg_;
 
-  uint32_t system_state_;  //< Bit-union of StateFlag values.
-  GraspingState grasping_state_;
+  // State of the gripper, according to most recent status messages received;
+  // valid only after DoCalibrationSteps().
+  uint32_t system_state_ {0};  //< Bit-union of StateFlag values.
+  GraspingState grasping_state_ {kIdle};
+  double last_position_mm_ {0};
+  double last_applied_force_ {0};
+  double last_speed_mm_per_s_ {0};
 
-  double target_position_mm_;
-  double target_force_;
-  double last_position_mm_;
-  double last_applied_force_;
-  double last_speed_mm_per_s_;
+  // Current position/force command that the gripper is executing, or has
+  // encountered an error while executing.
+  double current_target_pos_mm_ {0};
+  double current_target_force_ {0};
 
+  // Physical limit constants reported by the gripper; valid only after
+  // DoCalibrationSteps().
   PhysicalLimits physical_limits_;
 };
 
