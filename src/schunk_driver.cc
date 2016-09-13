@@ -18,7 +18,6 @@ const char* lcm_status_channel = "SCHUNK_STATUS";
 const char* lcm_command_channel = "SCHUNK_COMMAND";
 
 
-
 /// This class implements an LCM endpoint that relays received LCM commands to
 /// the Wsg and receieved Wsg status back over LCM.
 class SchunkLcmClient {
@@ -50,6 +49,10 @@ class SchunkLcmClient {
     lcm_status_.actual_force = (pf_control_.speed_mm_per_s() > 0
                                 ? pf_control_.force()
                                 : -pf_control_.force());
+
+    // TODO(ggould-tri) handle finger data and how force measurement changes
+    // with smart fingers (eg, does this switch from force before to after
+    // stiction)
   }
 
  private:
@@ -63,7 +66,6 @@ class SchunkLcmClient {
   schunk_driver::PositionForceControl pf_control_;
   lcmt_schunk_status lcm_status_;
   lcmt_schunk_command lcm_command_;
-
 };
 }  // namespace schunk_driver
 
