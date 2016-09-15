@@ -25,8 +25,9 @@ class SchunkLcmClient {
 
   SchunkLcmClient()
       : lcm_(),
-        pf_control_(std::unique_ptr<Wsg>(new Wsg()))
-  {}
+        pf_control_(std::unique_ptr<Wsg>(new Wsg())) {
+    assert(lcm_.good());
+  }
 
   ~SchunkLcmClient() {}
 
@@ -49,6 +50,9 @@ class SchunkLcmClient {
     lcm_status_.actual_force = (pf_control_.speed_mm_per_s() > 0
                                 ? pf_control_.force()
                                 : -pf_control_.force());
+
+    int result = lcm_.handle();
+    assert(result >= 0);
 
     // TODO(ggould-tri) handle finger data and how force measurement changes
     // with smart fingers (eg, does this switch from force before to after
