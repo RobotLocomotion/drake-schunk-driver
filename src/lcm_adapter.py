@@ -33,3 +33,26 @@ def get_lcm_message_class(lcmt_directory, lcmt_module_name):
         sys.path.pop()
     return lcm_message_module.__dict__[
         [c for c in dir(lcm_message_module) if c.startswith("lcmt_")][0]]
+
+
+"""Return a list of every available LCM message class."""
+def get_all_lcm_message_classes(lcmt_directory):
+    lcmtypes_dir = os.path.abspath(lcmt_directory)
+    lcmtypes_parent_dir = os.path.dirname(lcmtypes_dir)
+    lcmtypes_parent_name = os.path.basename(lcmtypes_dir)
+    appended = False
+    if lcmtypes_parent_dir not in sys.path:
+        sys.path.append(lcmtypes_parent_dir)
+        appended = True
+    lcm_parent_module = importlib.import_module(lcmtypes_parent_name)
+    if appended:
+        sys.path.pop()
+    return [get_lcm_message_class(lcmt_directory, name)
+            for name in dir(lcm_parent_module)
+            if '__' not in name]
+
+"""Prints the contents of an LCM message."""
+def debug_print_msg(msg):
+    print msg, ":"
+    for slot in msg.__slots__:
+        print "  slot", slot, "value", getattr(msg, slot)

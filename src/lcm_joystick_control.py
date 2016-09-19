@@ -24,11 +24,6 @@ LCMTYPES_DIR = sys.argv[1]
 LCM_MODULE_NAME = sys.argv[2]
 lcm_message_class = lcm.get_lcm_message_class(LCMTYPES_DIR, LCM_MODULE_NAME)
 
-def debug_print_msg(msg):
-    print msg, ":"
-    for slot in msg.__slots__:
-        print "  slot", slot, "value", getattr(msg, slot)
-
 
 class JoystickEventProcessor:
     def __init__(self):
@@ -62,7 +57,6 @@ class JoystickEventProcessor:
         # Magically fill in the field named "timestamp" if any.
         if hasattr(new_msg, "timestamp"):
             new_msg.timestamp = int(time.time() * 1e6)
-        debug_print_msg(new_msg)
         return new_msg
 
 

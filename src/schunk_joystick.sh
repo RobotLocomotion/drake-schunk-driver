@@ -1,7 +1,10 @@
 #!/bin/bash
 
-# Where to find lcm_joystick_control.py.
+# Locations of various important programs.
+SCHUNK_DRIVER_CMD=$(dirname $(dirname $(readlink -e $0)))/build/schunk-driver-prefix/src/schunk-driver-build/bin/schunk_driver
 LCM_JOYSTICK_CONTROL_CMD=$(dirname $(readlink -e $0))/lcm_joystick_control.py
+LCM_LOGGER_CMD=$(dirname $(readlink -e $0))/lcm_logger.py
+
 
 # The location of the 'build' dir.
 LOCAL_BUILD=$(readlink -e $(dirname $0)"/../build")
@@ -26,6 +29,16 @@ POSITION_MAPPING="--mapping 0 target_position_mm 50 49"
 # Map the left stick y axis to force from 1 to 79 (N).
 FORCE_MAPPING="--mapping 1 force 40 -39"
 
+# Run our various ancillary commands that respond nicely to signals.
+$SCHUNK_DRIVER_CMD &
+$LCM_LOGGER_CMD $SCHUNK_LCMT_DIR --file log.lcm \
+                SCHUNK_COMMAND SCHUNK_STATUS &
+
+# Run the joystick process (which ignores SIGINT and waits for a "start"
+# button press to exit) and when it ends clean up everything else.
 $LCM_JOYSTICK_CONTROL_CMD \
     $SCHUNK_LCMT_DIR lcmt_schunk_command --lcm_tag SCHUNK_COMMAND \
     $POSITION_MAPPING $FORCE_MAPPING --quit-on 9
+trap '' INT TERM  # Needed to make the 'wait' below actually execute.
+kill -TERM 0
+wait
