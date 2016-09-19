@@ -14,8 +14,8 @@
 
 namespace schunk_driver {
 
-const char* lcm_status_channel = "SCHUNK_STATUS";
-const char* lcm_command_channel = "SCHUNK_COMMAND";
+const char* kLcmStatusChannel = "SCHUNK_STATUS";
+const char* kLcmCommandChannel = "SCHUNK_COMMAND";
 
 
 /// This class implements an LCM endpoint that relays received LCM commands to
@@ -33,7 +33,7 @@ class SchunkLcmClient {
 
   bool Initialize() {
     pf_control_.DoCalibrationSteps();
-    lcm_.subscribe(lcm_command_channel,
+    lcm_.subscribe(kLcmCommandChannel,
                    &SchunkLcmClient::HandleCommandMessage, this);
   }
 
@@ -51,7 +51,8 @@ class SchunkLcmClient {
                                 ? pf_control_.force()
                                 : -pf_control_.force());
 
-    int result = lcm_.handle();
+    lcm_.publish(kLcmStatusChannel, &lcm_status_);
+    int result = lcm_.handleTimeout(1);
     assert(result >= 0);
 
     // TODO(ggould-tri) handle finger data and how force measurement changes
