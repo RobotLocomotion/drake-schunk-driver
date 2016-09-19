@@ -52,7 +52,9 @@ def get_all_lcm_message_classes(lcmt_directory):
             if '__' not in name]
 
 """Prints the contents of an LCM message."""
-def debug_print_msg(msg):
-    print msg, ":"
+def debug_print_msg(msg, outfile=None):
+    if outfile is None:
+        outfile = sys.stdout
+    print >>outfile, msg, ":"
     for slot in msg.__slots__:
-        print "  slot", slot, "value", getattr(msg, slot)
+        print >>outfile, "  slot", slot, "value", getattr(msg, slot)

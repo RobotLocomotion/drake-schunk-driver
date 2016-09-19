@@ -31,7 +31,7 @@ FORCE_MAPPING="--mapping 1 force 40 -39"
 
 # Run our various ancillary commands that respond nicely to signals.
 $SCHUNK_DRIVER_CMD &
-$LCM_LOGGER_CMD $SCHUNK_LCMT_DIR --file log.lcm \
+$LCM_LOGGER_CMD $SCHUNK_LCMT_DIR --logfile log.lcm --format csv \
                 SCHUNK_COMMAND SCHUNK_STATUS &
 
 # Run the joystick process (which ignores SIGINT and waits for a "start"
