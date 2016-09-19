@@ -34,3 +34,7 @@
 
 # generated directories
 build/
+
+# python
+*.pyc
+

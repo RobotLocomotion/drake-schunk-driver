@@ -1,0 +1,35 @@
+import importlib
+import os
+import sys
+
+# Locate a built copy of LCM in this directory's build and export trees.
+THIS_FILE = os.path.abspath(__file__)
+SRC_DIR = os.path.dirname(THIS_FILE)
+DIST_DIR = os.path.dirname(SRC_DIR)
+BUILD_LIBS_DIR = os.path.join(DIST_DIR, "build/lib/")
+BUILD_INSTALL_LIBS_DIR = os.path.join(DIST_DIR, "build/install/lib/")
+BUILD_PYLIBS_DIR = os.path.join(DIST_DIR, "build/lib/python2.7")
+LCM_SO_DIR = os.path.join(DIST_DIR, "externals/lcm/lcm")
+sys.path.extend([
+    LCM_SO_DIR,
+    os.path.join(BUILD_PYLIBS_DIR, "dist-packages"),
+    os.path.join(BUILD_PYLIBS_DIR, "site-packages")])
+print sys.path
+
+# Re-export all of the symbols in lcm.
+from lcm import *
+
+
+"""Given a directory and LCM type name, return the generated class of that LCM
+type."""
+def get_lcm_message_class(lcmt_directory, lcmt_module_name):
+    lcmtypes_dir = os.path.abspath(lcmt_directory)
+    appended = False
+    if lcmtypes_dir not in sys.path:
+        sys.path.append(lcmtypes_dir)
+        appended = True
+    lcm_message_module = importlib.import_module(lcmt_module_name)
+    if appended:
+        sys.path.pop()
+    return lcm_message_module.__dict__[
+        [c for c in dir(lcm_message_module) if c.startswith("lcmt_")][0]]

@@ -7,8 +7,6 @@ path and classname for the LCM codegen output.
 
 import argparse
 import copy
-import importlib
-import os
 import pygame
 import subprocess
 import sys
@@ -20,28 +18,11 @@ if len(sys.argv) < 3:
              that you wish to map to the joystick."""
     sys.exit(1)
 
-THIS_FILE = os.path.abspath(__file__)
-SRC_DIR = os.path.dirname(THIS_FILE)
-DIST_DIR = os.path.dirname(SRC_DIR)
-BUILD_LIBS_DIR = os.path.join(DIST_DIR, "build/lib/")
-BUILD_INSTALL_LIBS_DIR = os.path.join(DIST_DIR, "build/install/lib/")
-BUILD_PYLIBS_DIR = os.path.join(DIST_DIR, "build/lib/python2.7")
-LCMTYPES_DIR = os.path.abspath(sys.argv[1])
-LCM_SO_DIR = os.path.join(DIST_DIR, "externals/lcm/lcm")
-sys.path.extend([
-    LCMTYPES_DIR,
-    LCM_SO_DIR,
-    os.path.join(BUILD_PYLIBS_DIR, "dist-packages"),
-    os.path.join(BUILD_PYLIBS_DIR, "site-packages")])
-print sys.path
+import lcm_adapter as lcm
 
-import lcm
-
+LCMTYPES_DIR = sys.argv[1]
 LCM_MODULE_NAME = sys.argv[2]
-lcm_message_module = importlib.import_module(LCM_MODULE_NAME)
-lcm_message_class = lcm_message_module.__dict__[
-    [c for c in dir(lcm_message_module) if c.startswith("lcmt_")][0]]
-
+lcm_message_class = lcm.get_lcm_message_class(LCMTYPES_DIR, LCM_MODULE_NAME)
 
 def debug_print_msg(msg):
     print msg, ":"
