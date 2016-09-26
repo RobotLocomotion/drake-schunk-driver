@@ -4,8 +4,9 @@ import sys
 
 # Locate a built copy of LCM in this directory's build and export trees.
 THIS_FILE = os.path.abspath(__file__)
-SRC_DIR = os.path.dirname(THIS_FILE)
-DIST_DIR = os.path.dirname(SRC_DIR)
+THIS_DIR = os.path.dirname(THIS_FILE)
+DIST_DIR = os.path.dirname(THIS_DIR)
+SRC_DIR = os.path.join(DIST_DIR, 'src')
 BUILD_LIBS_DIR = os.path.join(DIST_DIR, "build/lib/")
 BUILD_INSTALL_LIBS_DIR = os.path.join(DIST_DIR, "build/install/lib/")
 BUILD_PYLIBS_DIR = os.path.join(DIST_DIR, "build/lib/python2.7")

@@ -3,10 +3,7 @@ Driver software for the Schunk gripper.
 
 To build:
 
-  mkdir build
-  cd build
-  cmake ..
-  make
+  ./tools/build.sh
 
 To test the gripper:
 

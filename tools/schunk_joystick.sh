@@ -1,22 +1,24 @@
 #!/bin/bash
 
-# Locations of various important programs.
-SCHUNK_DRIVER_CMD=$(dirname $(dirname $(readlink -e $0)))/build/schunk-driver-prefix/src/schunk-driver-build/bin/schunk_driver
-LCM_JOYSTICK_CONTROL_CMD=$(dirname $(readlink -e $0))/lcm_joystick_control.py
-LCM_LOGGER_CMD=$(dirname $(readlink -e $0))/lcm_logger.py
-
-
+# Top-level repository directory.
+DISTRO=$(dirname $(dirname $(readlink -e $0)))
 # The location of the 'build' dir.
-LOCAL_BUILD=$(readlink -e $(dirname $0)"/../build")
+BUILD=$DISTRO"/build"
+
+# Tool executable locations.
+SCHUNK_DRIVER_CMD=$BUILD"/schunk_driver"
+LCM_JOYSTICK_CONTROL_CMD=$DISTRO"/tools/lcm_joystick_control.py"
+LCM_LOGGER_CMD=$DISTRO"/tools/lcm_logger.py"
 
 # Where to find the LCMT python codegen files.
-SCHUNK_LCMT_DIR=$LOCAL_BUILD"/schunk-driver-prefix/src/schunk-driver-build/lcmgen/lcmtypes/schunk_driver"
+SCHUNK_LCMT_DIR=$BUILD"/schunk-driver-prefix/src/schunk-driver-build/lcmgen/lcmtypes/schunk_driver"
 
 # Where to find liblcm.so.1.
-LCM_SO_DIR=$LOCAL_BUILD"/lib"
+# TODO(ggould-tri) Supposedly this will change and become unnecessary soon.
+LCM_SO_DIR=$BUILD"/lib"
 
 # Where to find "lcm/__init__.py".
-LCM_PY_DIR=$LOCAL_BUILD"/lib/python2.7/site-packages/lcm/"
+LCM_PY_DIR=$BUILD"/lib/python2.7/site-packages/lcm/"
 
 set -ex
 
@@ -31,7 +33,7 @@ FORCE_MAPPING="--mapping 1 force 40 -39"
 
 # Run our various ancillary commands that respond nicely to signals.
 $SCHUNK_DRIVER_CMD &
-$LCM_LOGGER_CMD $SCHUNK_LCMT_DIR --logfile log.lcm --format csv \
+$LCM_LOGGER_CMD $SCHUNK_LCMT_DIR --logfile log.csv --format csv \
                 SCHUNK_COMMAND SCHUNK_STATUS &
 
 # Run the joystick process (which ignores SIGINT and waits for a "start"
