@@ -1,7 +1,9 @@
 #include <cassert>
-#include <cmath>
-#include <iostream>
+#include <ctime>
+
+#include <math.h>
 #include <unistd.h>
+#include <sys/time.h>
 
 #include <lcm/lcm-cpp.hpp>
 
@@ -41,7 +43,7 @@ class SchunkLcmClient {
     pf_control_.Task();
     // Schunk only uses positive force; use absolute value of commanded force.
     pf_control_.SetPositionAndForce(lcm_command_.target_position_mm,
-                                    std::abs(lcm_command_.force));
+                                    fabs(lcm_command_.force));
     lcm_status_.actual_position_mm = pf_control_.position_mm();
     lcm_status_.actual_speed_mm_per_s = pf_control_.speed_mm_per_s();
 
@@ -50,6 +52,10 @@ class SchunkLcmClient {
     lcm_status_.actual_force = (pf_control_.speed_mm_per_s() > 0
                                 ? pf_control_.force()
                                 : -pf_control_.force());
+
+    struct timeval tv;
+    gettimeofday(&tv, nullptr);
+    lcm_status_.timestamp = tv.tv_sec * 1000000L + tv.tv_usec;
 
     lcm_.publish(kLcmStatusChannel, &lcm_status_);
     int result = lcm_.handleTimeout(1);

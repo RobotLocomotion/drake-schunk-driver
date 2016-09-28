@@ -13,15 +13,16 @@ if len(sys.argv) < 2:
 MESSAGE_CLASSES = lcm.get_all_lcm_message_classes(sys.argv[1])
 
 
-"""Sets up all of the LCMSubscription objects for the channels indicated in
-the arguments."""
 def set_up_subscriptions(lcm_connection, args):
+    """Sets up all of the LCMSubscription objects for the channels indicated in
+    the arguments."""
     if args.format == "lcm":
         lcm_logger = lcm.EventLog(args.logfile, mode='w', overwrite=True)
     else:
         # Deliberately leaked; we'll let the GC handle the close() for us.
         logfile = (sys.stdout if args.logfile is None
                    else open(args.logfile, 'w'))
+        write_csv_headers(logfile)
 
     def handle_message(channel, message):
         decoded = try_decode(message)
@@ -31,8 +32,9 @@ def set_up_subscriptions(lcm_connection, args):
         if args.format == "lcm":
             lcm_logger.write_event(decoded.timestamp, channel, message)
         elif args.format == "csv":
-            fields = [channel] + [getattr(decoded, slot)
-                                  for slot in sorted(decoded.__slots__)]
+            fields = ([channel, type(decoded).__name__] +
+                      [getattr(decoded, slot)
+                       for slot in sorted(decoded.__slots__)])
             logfile.write(",".join(['"%s"' % f for f in fields]) + "\n")
         elif args.format == "pretty":
             lcm.debug_print_msg(decoded, logfile)
@@ -43,15 +45,24 @@ def set_up_subscriptions(lcm_connection, args):
         print "subscribing to channel", channel
         lcm_connection.subscribe(channel, handle_message)
 
-"""Try to decode the message with each known message class; return the first
-successful decode, or None."""
 def try_decode(message):
+    """Try to decode the message with each known message class; return
+    the first successful decode, or None."""
     for c in MESSAGE_CLASSES:
         try:
             return c.decode(message)
         except ValueError:
             pass  # The message was probably of a different type.
     return None
+
+def write_csv_headers(logfile):
+    """Write header lines in the CSV file with the schema of the messages
+    involved."""
+    for c in MESSAGE_CLASSES:
+        header_prefix = ["", c.__name__]
+        header_elements = sorted(c.__slots__)
+        logfile.write(",".join(
+            ['"%s"' % h for h in (header_prefix + header_elements)]) + "\n")
 
 def main(argv):
     parser = argparse.ArgumentParser(description='Log some local LCM traffic.')
