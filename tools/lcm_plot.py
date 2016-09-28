@@ -94,10 +94,10 @@ def main(argv):
         'csv_file', type=argparse.FileType('r'),
         help="CSV file to read data from")
     parser.add_argument(
-        '-f', '--field', action='append',
+        '-f', '--field', action='append', default=[],
         help="Field name to plot, in channel.message_type.fieldname form")
     parser.add_argument(
-        '-d', '--difference', nargs=2, action='append',
+        '-d', '--difference', nargs=2, action='append', default=[],
         help="Also display the differences between two fields")
     args = parser.parse_args(argv[1:])
     events = list(extract_events(args.csv_file))
