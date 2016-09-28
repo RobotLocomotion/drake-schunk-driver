@@ -16,8 +16,6 @@ def plot_events(events, fields_to_plot):
     output that match @p fields_to_plot (a list of fully-qualified field
     names).
     """
-    field_indices = {field_name: index
-                     for (index, field_name) in enumerate(fields_to_plot)}
     field_xy_pairs = {field_name: []
                       for (index, field_name) in enumerate(fields_to_plot)}
     x_bounds = [float("inf"), float("-inf")]
@@ -28,14 +26,40 @@ def plot_events(events, fields_to_plot):
             if event_field_name in field_xy_pairs:
                 xy_pair = (int(timestamp), float(event_field_value))
                 field_xy_pairs[event_field_name].append(xy_pair)
-                x_bounds[0] = min(xy_pair[0], x_bounds[0])
-                x_bounds[1] = max(xy_pair[0], x_bounds[1])
-                y_bounds[0] = min(xy_pair[1], y_bounds[0])
-                y_bounds[1] = max(xy_pair[1], y_bounds[1])
-    for field_name, xy_pairs in field_xy_pairs.iteritems():
+                _adjust_bounds(x_bounds, y_bounds, xy_pair)
+    for _, xy_pairs in field_xy_pairs.iteritems():
         plt.plot([pair[0] for pair in xy_pairs],
                  [pair[1] for pair in xy_pairs])
     plt.axis(x_bounds + y_bounds)
+
+def plot_differences(events, differences_to_plot):
+    participating_fields = [field
+                            for pairs in differences_to_plot
+                            for field in pairs]
+    most_recent_values = {}
+    difference_xy_pairs = {tuple(diff): [] for diff in differences_to_plot}
+    for event in events:
+        timestamp = event["timestamp"]
+        for event_field_name, event_field_value in event.iteritems():
+            if event_field_name in participating_fields:
+                most_recent_values[event_field_name] = float(event_field_value)
+                for difference_pair in difference_xy_pairs:
+                    if event_field_name in difference_pair:
+                        if ((difference_pair[0] in most_recent_values) and
+                            (difference_pair[1] in most_recent_values)):
+                            difference_xy_pairs[difference_pair].append(
+                                (timestamp,
+                                 most_recent_values[difference_pair[0]] -
+                                 most_recent_values[difference_pair[1]]))
+    for _, xy_pairs in difference_xy_pairs.iteritems():
+        plt.plot([pair[0] for pair in xy_pairs],
+                 [pair[1] for pair in xy_pairs])
+
+def _adjust_bounds(x_bounds, y_bounds, xy_pair):
+    x_bounds[0] = min(xy_pair[0], x_bounds[0])
+    x_bounds[1] = max(xy_pair[0], x_bounds[1])
+    y_bounds[0] = min(xy_pair[1], y_bounds[0])
+    y_bounds[1] = max(xy_pair[1], y_bounds[1])
 
 def extract_events(filehandle):
     """Reads csv-formatted messages (defined by header rows) from the given
@@ -72,9 +96,13 @@ def main(argv):
     parser.add_argument(
         '-f', '--field', action='append',
         help="Field name to plot, in channel.message_type.fieldname form")
+    parser.add_argument(
+        '-d', '--difference', nargs=2, action='append',
+        help="Also display the differences between two fields")
     args = parser.parse_args(argv[1:])
-    events = extract_events(args.csv_file)
+    events = list(extract_events(args.csv_file))
     plot_events(events, args.field)
+    plot_differences(events, args.difference)
     plt.show()
 
 
