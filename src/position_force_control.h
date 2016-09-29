@@ -37,10 +37,10 @@ class PositionForceControl {
   void Task();
 
   /// Get the current position (in millimeters of base separation).
-  double position_mm();
+  double position_mm() const;
 
   /// Get the current speed (in millimeters per second).
-  double speed_mm_per_s();
+  double speed_mm_per_s() const;
 
   /// Get the current applied force.  This is the force in Newtons applied by
   /// a grasped object to the gripper, positive outward, and so will be near
@@ -50,7 +50,7 @@ class PositionForceControl {
   /// Note that per WSG documentation this force is an estimate based on
   /// current and so will be inaccurate and sensitive to temperature,
   /// twisting, and asymmetric loading of the fingers.
-  double force();
+  double force() const;
 
  private:
   std::unique_ptr<Wsg> wsg_;
@@ -65,8 +65,8 @@ class PositionForceControl {
 
   // Current position/force command that the gripper is executing, or has
   // encountered an error while executing.
-  double current_target_pos_mm_ {0};
-  double current_target_force_ {0};
+  double executing_target_position_mm_ {0};
+  double executing_force_ {0};
 
   // Physical limit constants reported by the gripper; valid only after
   // DoCalibrationSteps().

@@ -131,6 +131,12 @@ class Wsg {
     SendAndAwaitResponse(command, 0.1);
   }
 
+  bool SetForceLimitNonblocking(double force) {
+    WsgCommandMessage command(kSetForceLimit, {});
+    command.AppendToPayload(static_cast<float>(force));
+    tx_.Send(command);
+  }
+
   bool SetAcceleration(double acceleration_mm_per_ss) {
     WsgCommandMessage command(kSetAccel, {});
     command.AppendToPayload(static_cast<float>(acceleration_mm_per_ss));

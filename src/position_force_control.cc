@@ -48,29 +48,46 @@ StatusCode PositionForceControl::DoCalibrationSteps() {
 
 
 void PositionForceControl::SetPositionAndForce(
-    double position_mm, double force) {
+    double commanded_position_mm, double commanded_force) {
   // Use the preposition command (which is SPECIFICALLY NOT INTENDED for this
   // use case) to emulate force control.
 
-  // TODO(ggould-tri) consider using grip command when motion is inward; this
-  // is more correct but probably requires handling many more result statuses.
+  bool must_recommand = false;
 
-  // Do not recommand if new values are within epsilon of currently commanded
-  // values, in order to avoid unnecessary Stop commands and resulting delay,
-  // jerkiness, noise, and heat.
-  if ((std::abs(force - current_target_force_) < kForceDeadband) &&
-      (std::abs(position_mm - current_target_pos_mm_) < kPositionDeadbandMm)) {
-    return;
+  // If the commanded force is outside of our force deadband, we must
+  // recommand.
+  if (fabs(commanded_force - force()) > kForceDeadband) {
+    must_recommand = true;
   }
 
+  // If the commanded position and executing position are in opposite
+  // directions from the current position we must recommand.
+  if (commanded_position_mm > position_mm() &&
+      position_mm() > executing_target_position_mm_) {
+    must_recommand = true;
+  } else if (commanded_position_mm < position_mm() &&
+             position_mm() < executing_target_position_mm_) {
+    must_recommand = true;
+  }
+
+  // If we are stopped, we must recommand.
+  if (grasping_state_ == kIdle) {
+    must_recommand = true;
+  }
+
+  if (!must_recommand) { return; }
+
   // TODO(ggould-tri) adjust acceleration limit to some multiple of force.
-  wsg_->SetForceLimit(force);
+  wsg_->SetForceLimitNonblocking(commanded_force);
+  executing_force_ = commanded_force;
+
+  // TODO(ggould-tri) consider using grip command when motion is inward; this
+  // is more correct but probably requires handling many more result statuses.
   wsg_->Stop();
   wsg_->PrepositionNonblocking(
       Wsg::kPrepositionClampOnBlock, Wsg::kPrepositionAbsolute,
-      position_mm, physical_limits_.max_speed_mm_per_s_);
-  current_target_force_ = force;
-  current_target_pos_mm_ = position_mm;
+      commanded_position_mm, physical_limits_.max_speed_mm_per_s_);
+  executing_target_position_mm_ = commanded_position_mm;
 }
 
 
@@ -115,8 +132,16 @@ void PositionForceControl::Task() {
 }
 
 
-double PositionForceControl::position_mm() { return last_position_mm_; }
-double PositionForceControl::force() { return last_applied_force_; }
-double PositionForceControl::speed_mm_per_s() { return last_speed_mm_per_s_; }
+double PositionForceControl::position_mm() const {
+  return last_position_mm_;
+}
+
+double PositionForceControl::force() const {
+  return last_applied_force_;
+}
+
+double PositionForceControl::speed_mm_per_s() const {
+  return last_speed_mm_per_s_;
+}
 
 } // namespace schunk_driver
