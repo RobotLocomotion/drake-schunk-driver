@@ -5,8 +5,8 @@ include (../externals/cmake/pods.cmake)
 pods_find_pkg_config(lcm)
 
 include (../externals/cmake/lcmtypes.cmake)
-add_lcmtype(lcmt_schunk_command.lcm)
-add_lcmtype(lcmt_schunk_status.lcm)
+add_lcmtype(lcmt_schunk_wsg_command.lcm)
+add_lcmtype(lcmt_schunk_wsg_status.lcm)
 lcmtypes_build()
 
 set(wsg_files)

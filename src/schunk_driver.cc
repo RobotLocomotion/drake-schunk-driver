@@ -7,17 +7,19 @@
 
 #include <lcm/lcm-cpp.hpp>
 
-#include "lcmtypes/schunk_driver/lcmt_schunk_command.hpp"
-#include "lcmtypes/schunk_driver/lcmt_schunk_status.hpp"
+#include "lcmtypes/drake/lcmt_schunk_wsg_command.hpp"
+#include "lcmtypes/drake/lcmt_schunk_wsg_status.hpp"
 
 #include "position_force_control.h"
 #include "wsg.h"
 
+using drake::lcmt_schunk_wsg_command;
+using drake::lcmt_schunk_wsg_status;
 
 namespace schunk_driver {
 
-const char* kLcmStatusChannel = "SCHUNK_STATUS";
-const char* kLcmCommandChannel = "SCHUNK_COMMAND";
+const char* kLcmStatusChannel = "SCHUNK_WSG_STATUS";
+const char* kLcmCommandChannel = "SCHUNK_WSG_COMMAND";
 
 
 /// This class implements an LCM endpoint that relays received LCM commands to
@@ -61,7 +63,7 @@ class SchunkLcmClient {
 
     struct timeval tv;
     gettimeofday(&tv, nullptr);
-    lcm_status_.timestamp = tv.tv_sec * 1000000L + tv.tv_usec;
+    lcm_status_.utime = tv.tv_sec * 1000000L + tv.tv_usec;
 
     lcm_.publish(kLcmStatusChannel, &lcm_status_);
 
@@ -73,14 +75,14 @@ class SchunkLcmClient {
  private:
   void HandleCommandMessage(const lcm::ReceiveBuffer* rbuf,
                             const std::string& chan,
-                            const lcmt_schunk_command* command) {
+                            const lcmt_schunk_wsg_command* command) {
     lcm_command_ = *command;
   }
 
   lcm::LCM lcm_;
   schunk_driver::PositionForceControl pf_control_;
-  lcmt_schunk_status lcm_status_;
-  lcmt_schunk_command lcm_command_;
+  lcmt_schunk_wsg_status lcm_status_;
+  lcmt_schunk_wsg_command lcm_command_;
 };
 }  // namespace schunk_driver
 

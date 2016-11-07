@@ -11,7 +11,7 @@ LCM_JOYSTICK_CONTROL_CMD=$DISTRO"/tools/lcm_joystick_control.py"
 LCM_LOGGER_CMD=$DISTRO"/tools/lcm_logger.py"
 
 # Where to find the LCMT python codegen files.
-SCHUNK_LCMT_DIR=$BUILD"/schunk-driver-prefix/src/schunk-driver-build/lcmgen/lcmtypes/schunk_driver"
+SCHUNK_LCMT_DIR=$BUILD"/schunk-driver-prefix/src/schunk-driver-build/lcmgen/lcmtypes/drake"
 
 # Where to find liblcm.so.1.
 # TODO(ggould-tri) Supposedly this will change and become unnecessary soon.
@@ -34,12 +34,12 @@ FORCE_MAPPING="--mapping 1 force 40 -39"
 # Run our various ancillary commands that respond nicely to signals.
 $SCHUNK_DRIVER_CMD &
 $LCM_LOGGER_CMD $SCHUNK_LCMT_DIR --logfile log.csv --format csv \
-                SCHUNK_COMMAND SCHUNK_STATUS &
+                SCHUNK_WSG_COMMAND SCHUNK_WSG_STATUS &
 
 # Run the joystick process (which ignores SIGINT and waits for a "start"
 # button press to exit) and when it ends clean up everything else.
 $LCM_JOYSTICK_CONTROL_CMD \
-    $SCHUNK_LCMT_DIR lcmt_schunk_command --lcm_tag SCHUNK_COMMAND \
+    $SCHUNK_LCMT_DIR lcmt_schunk_wsg_command --lcm_tag SCHUNK_WSG_COMMAND \
     $POSITION_MAPPING $FORCE_MAPPING --quit-on 9
 trap '' INT TERM  # Needed to make the 'wait' below actually execute.
 kill -TERM 0
