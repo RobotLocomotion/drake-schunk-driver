@@ -40,6 +40,12 @@ class SchunkLcmClient {
   }
 
   void Task() {
+    // Process all pending messages since our last Task() so that we
+    // only act on the newest.
+    int result = -1;
+    while ((result = lcm_.handleTimeout(0)) > 0) {}
+    assert(result == 0);
+
     pf_control_.Task();
     // Schunk only uses positive force; use absolute value of commanded force.
     pf_control_.SetPositionAndForce(lcm_command_.target_position_mm,
@@ -58,8 +64,6 @@ class SchunkLcmClient {
     lcm_status_.timestamp = tv.tv_sec * 1000000L + tv.tv_usec;
 
     lcm_.publish(kLcmStatusChannel, &lcm_status_);
-    int result = lcm_.handleTimeout(1);
-    assert(result >= 0);
 
     // TODO(ggould-tri) handle finger data and how force measurement changes
     // with smart fingers (eg, does this switch from force before to after
@@ -86,7 +90,11 @@ int main(int argc, char** argv) {
   assert(client.Initialize());
   while(true) {
     client.Task();
-    usleep(1000);
+    // Note: too short of a sleep here can put the gripper into some
+    // kind of error state.  The right thing to do is probably to
+    // directly regulate how quickly we're sending commands, but a
+    // 50ms delay on grasping is probably not the end of the world.
+    usleep(50000);
   }
   return 0;
 }
