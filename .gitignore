@@ -34,7 +34,7 @@
 
 # generated directories
 build/
+bazel-*
 
 # python
 *.pyc
-

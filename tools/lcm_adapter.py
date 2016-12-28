@@ -46,11 +46,21 @@ def get_all_lcm_message_classes(lcmt_directory):
         sys.path.append(lcmtypes_parent_dir)
         appended = True
     lcm_parent_module = importlib.import_module(lcmtypes_parent_name)
+    print dir(lcm_parent_module)
     if appended:
         sys.path.pop()
+
+    names = [name for name in dir(lcm_parent_module)
+             if '__' not in name]
+    # TODO(sam.creasey) This is a hack because the bazel version of
+    # the lcm python library generator doesn't create an __init__.py
+    # which imports the message classes.
+    if len(names) == 0:
+        names = [name[:-3] for name in os.listdir(lcmtypes_dir)
+                 if '__' not in name and name.endswith(".py")]
     return [get_lcm_message_class(lcmt_directory, name)
-            for name in dir(lcm_parent_module)
-            if '__' not in name]
+            for name in names]
+
 
 """Prints the contents of an LCM message."""
 def debug_print_msg(msg, outfile=None):

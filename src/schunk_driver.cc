@@ -7,8 +7,8 @@
 
 #include <lcm/lcm-cpp.hpp>
 
-#include "lcmtypes/drake/lcmt_schunk_wsg_command.hpp"
-#include "lcmtypes/drake/lcmt_schunk_wsg_status.hpp"
+#include "drake/lcmt_schunk_wsg_command.hpp"
+#include "drake/lcmt_schunk_wsg_status.hpp"
 
 #include "position_force_control.h"
 #include "wsg.h"
