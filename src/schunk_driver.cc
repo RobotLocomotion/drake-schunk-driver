@@ -5,23 +5,38 @@
 #include <unistd.h>
 #include <sys/time.h>
 
+#include <gflags/gflags.h>
 #include <lcm/lcm-cpp.hpp>
 
 #include "drake/lcmt_schunk_wsg_command.hpp"
 #include "drake/lcmt_schunk_wsg_status.hpp"
 
+#include "defaults.h"
 #include "position_force_control.h"
 #include "wsg.h"
 
 using drake::lcmt_schunk_wsg_command;
 using drake::lcmt_schunk_wsg_status;
 
-namespace schunk_driver {
+namespace {
 
 const char* kLcmStatusChannel = "SCHUNK_WSG_STATUS";
 const char* kLcmCommandChannel = "SCHUNK_WSG_COMMAND";
 
+}  // namespace
 
+DEFINE_string(gripper_addr, schunk_driver::kGripperAddrStr,
+              "Address of the gripper to control");
+DEFINE_int32(gripper_port, schunk_driver::kGripperPort,
+             "Gripper UDP port");
+DEFINE_int32(local_port, schunk_driver::kLocalPort,
+             "Local UDP port");
+DEFINE_string(lcm_command_channel, kLcmCommandChannel,
+              "Channel to receive LCM command messages on");
+DEFINE_string(lcm_status_channel, kLcmStatusChannel,
+              "Channel to send LCM status messages on");
+
+namespace schunk_driver {
 /// This class implements an LCM endpoint that relays received LCM commands to
 /// the Wsg and receieved Wsg status back over LCM.
 class SchunkLcmClient {
@@ -29,7 +44,9 @@ class SchunkLcmClient {
 
   SchunkLcmClient()
       : lcm_(),
-        pf_control_(std::unique_ptr<Wsg>(new Wsg())) {
+        pf_control_(std::unique_ptr<Wsg>(new Wsg(
+            nullptr, FLAGS_local_port,
+            FLAGS_gripper_addr.c_str(), FLAGS_gripper_port))) {
     assert(lcm_.good());
   }
 
@@ -37,7 +54,7 @@ class SchunkLcmClient {
 
   bool Initialize() {
     pf_control_.DoCalibrationSteps();
-    lcm_.subscribe(kLcmCommandChannel,
+    lcm_.subscribe(FLAGS_lcm_command_channel,
                    &SchunkLcmClient::HandleCommandMessage, this);
   }
 
@@ -65,7 +82,7 @@ class SchunkLcmClient {
     gettimeofday(&tv, nullptr);
     lcm_status_.utime = tv.tv_sec * 1000000L + tv.tv_usec;
 
-    lcm_.publish(kLcmStatusChannel, &lcm_status_);
+    lcm_.publish(FLAGS_lcm_status_channel, &lcm_status_);
 
     // TODO(ggould-tri) handle finger data and how force measurement changes
     // with smart fingers (eg, does this switch from force before to after
@@ -88,6 +105,8 @@ class SchunkLcmClient {
 
 
 int main(int argc, char** argv) {
+  gflags::ParseCommandLineFlags(&argc, &argv, true);
+
   schunk_driver::SchunkLcmClient client;
   assert(client.Initialize());
   while(true) {

@@ -43,5 +43,8 @@ cc_binary(
         "wsg_return_receiver.cc",
     ],
     linkstatic = 1,
-    deps = ["schunk_wsg_lcmtypes"]
+    deps = [
+        ":schunk_wsg_lcmtypes",
+        "@gflags//:gflags",
+    ]
 )

@@ -5,7 +5,15 @@
 
 workspace(name = "drake_schunk_driver")
 
+load("//tools:github.bzl", "github_archive")
 load("//tools/third_party/kythe/tools/build_rules/config:pkg_config.bzl", "pkg_config_package")
+
+github_archive(
+    name = "gflags",
+    repository = "gflags/gflags",
+    commit = "a69b2544d613b4bee404988710503720c487119a",
+    sha256 = "8b3836d5ca34a2da4d6375cf5f2030c719b508ca16014fcc9d5e9b295b56a6c1",
+)
 
 pkg_config_package(
     name = "glib",
