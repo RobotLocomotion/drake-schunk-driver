@@ -13,7 +13,7 @@
 
 namespace schunk_driver {
 
-const static uint16_t kUpdatePeriodMs = 5;
+const static uint16_t kUpdatePeriodMs = 20;
 const static double kUpdateAdjustTimeout = 0.25;
 
 const static double kForceDeadband = 5;
@@ -70,20 +70,14 @@ void PositionForceControl::SetPositionAndForce(
     must_recommand = true;
   }
 
-  // If we are stopped, we must recommand.
-  if (grasping_state_ == kIdle) {
-    must_recommand = true;
-  }
 
   if (!must_recommand) { return; }
 
-  // TODO(ggould-tri) adjust acceleration limit to some multiple of force.
   wsg_->SetForceLimitNonblocking(commanded_force);
   executing_force_ = commanded_force;
 
   // TODO(ggould-tri) consider using grip command when motion is inward; this
   // is more correct but probably requires handling many more result statuses.
-  wsg_->Stop();
   wsg_->PrepositionNonblocking(
       Wsg::kPrepositionClampOnBlock, Wsg::kPrepositionAbsolute,
       commanded_position_mm, physical_limits_.max_speed_mm_per_s_);
