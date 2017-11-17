@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<launch>
+
+<arg name="pkg_name" default="drake-schunk-driver" />
+<arg name="gripper_address" value="192.168.1.20" />
+<arg name="gripper_port" value="1500" />
+<arg name="local_port" value="1501" />
+<arg name="command_topic" value="schunk_wsg_command" />
+<arg name="status_topic" value="schunk_wsg_status" />
+
+
+
+<node name="schunk_driver" pkg="$(arg pkg_name)" type="schunk_driver_ros" output="screen">
+    <param name="gripper_address" type="string" value="$(arg gripper_address)"/>
+    <param name="gripper_port" type="int" value="$(arg gripper_port)"/>
+    <param name="local_port" type="int" value="$(arg local_port)"/>
+    <param name="command_topic" type="string" value="$(arg command_topic)"/>
+    <param name="status_topic" type="string" value="$(arg status_topic)"/>
+</node>
+
+
+</launch>
