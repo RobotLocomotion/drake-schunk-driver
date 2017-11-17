@@ -54,7 +54,7 @@ class SchunkROSClient {
   ~SchunkROSClient() {}
 
   bool Initialize() {
-    pf_control_.DoCalibrationSteps();
+    StatusCode status_code = pf_control_.DoCalibrationSteps();
     command_subscriber_ = nh_.subscribe(command_topic_, 1, 
                    &SchunkROSClient::HandleCommandMessage, this);
     status_publisher_ = this->nh_.advertise<wsg50_msgs::WSG_50_state>(status_topic_, 0);
@@ -62,6 +62,8 @@ class SchunkROSClient {
     // setup the default command msg, which is to open the gripper
     command_msg_.position_mm = 100;
     command_msg_.force = 40;
+
+    return status_code == StatusCode::E_SUCCESS;
   }
 
   void Task() {
@@ -132,31 +134,29 @@ int main(int argc, char** argv) {
 
   ros::param::param<int>("loop_rate_Hz", loop_rate_Hz, 20);
 
-  schunk_driver::SchunkROSClient client(nh, gripper_address, command_topic, status_topic, gripper_port, local_port);
+  
 
+  
+  std::cout << "gripper_address = " << gripper_address << std::endl;
+  std::cout << "gripper_port = " << gripper_port  << std::endl;
+  std::cout << "local_port = " << local_port  << std::endl;
+  std::cout << "command_topic = " << command_topic << std::endl ;
+  std::cout << "status_topic = " << status_topic << std::endl ;
 
-  ROS_INFO("gripper_address = %s\n", gripper_address);
-  ROS_INFO("gripper_port = %s\n", gripper_port);
-  ROS_INFO("command_topic = %s \n", command_topic);
-
-  // nh.getParam("command_topic", command_topic);
-
-  // std::string status_topic;
-  // nh.getParam("status_topic", status_topic);
-
-  // int gripper_address;
-  // nh.getParam("gripper_address", gripper_address);
-  // schunk_driver::SchunkROSClient client;
-
-  // int gripper_port
-  // nh.getParam("gripper_port", gripper_port);
-
-  // int local_port;
-  // nh.getParam("local_port", local_port);
+  // ROS_INFO("command_topic = %s \n", command_topic);
+  // ROS_INFO("gripper_address = %s \n", gripper_address);
+  // ROS_INFO("gripper_port = %s\n", gripper_port);
+  
 
   ros::Rate loop_rate(loop_rate_Hz);
+  std::cout << "constructing SchunkROSClient \n";
+  schunk_driver::SchunkROSClient client(nh, gripper_address, command_topic, status_topic, gripper_port, local_port);
+  std::cout << "attemping to connect to gripper\n"; 
+  client.Initialize();
+  std::cout << "connected to gripper\n"; 
 
-  assert(client.Initialize());
+  // assert(client.Initialize());
+  std::cout << "starting to spin . . . \n";
   while(true) {
     ros::spinOnce();
     client.Task();

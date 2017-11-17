@@ -26,8 +26,15 @@ add_library(schunk_driver_library
 # target_include_directories(schunk_driver_library
 # 	PUBLIC "${HEADERS}")
 
-add_executable(schunk_driver_ros schunk_driver_ros.cc)
-target_link_libraries(schunk_driver_ros
+add_executable(schunk_driver_node schunk_driver_ros.cc)
+target_link_libraries(schunk_driver_node
 	schunk_driver_library
 	${catkin_LIBRARIES})
+
+# Mark executables and/or libraries for installation
+install(TARGETS schunk_driver_library schunk_driver_node
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
 
