@@ -5,7 +5,7 @@
 #include <unistd.h>
 #include <sys/time.h>
 
-
+#include <gflags/gflags.h>
 #include <lcm/lcm-cpp.hpp>
 
 #include "drake/lcmt_schunk_wsg_command.hpp"
