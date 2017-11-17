@@ -119,7 +119,7 @@ int main(int argc, char** argv) {
   // gflags::ParseCommandLineFlags(&argc, &argv, true);
 
   ros::init(argc, argv, "schunk_wsg50_driver");
-  ros::NodeHandle nh("schunk_wsg50_driver");
+  ros::NodeHandle nh("~");
   
   // read in parameters
   std::string command_topic, status_topic, gripper_address;
@@ -128,15 +128,16 @@ int main(int argc, char** argv) {
   ros::param::param<std::string>("command_topic", command_topic, "schunk_wsg_command");
   ros::param::param<std::string>("status_topic", status_topic, "schunk_wsg_status");
 
-  ros::param::param<std::string>("gripper_address", gripper_address, schunk_driver::kGripperAddrStr);
+  // ros::param::param<std::string>("gripper_address", gripper_address, schunk_driver::kGripperAddrStr);
+
   ros::param::param<int>("gripper_port", gripper_port, schunk_driver::kGripperPort);
   ros::param::param<int>("local_port", local_port, schunk_driver::kLocalPort);
 
   ros::param::param<int>("loop_rate_Hz", loop_rate_Hz, 20);
 
-  
+  nh.getParam("gripper_address", gripper_address); 
 
-  
+  // gripper_address = "192.170.10.20"; // hack for now
   std::cout << "gripper_address = " << gripper_address << std::endl;
   std::cout << "gripper_port = " << gripper_port  << std::endl;
   std::cout << "local_port = " << local_port  << std::endl;

@@ -2,12 +2,11 @@
 <launch>
 
 <arg name="pkg_name" default="ros-schunk-driver" />
-<arg name="gripper_address" value="192.168.1.20" />
+<arg name="gripper_address" default="192.170.10.20" />
 <arg name="gripper_port" value="1500" />
 <arg name="local_port" value="1501" />
 <arg name="command_topic" value="schunk_wsg_command" />
 <arg name="status_topic" value="schunk_wsg_status" />
-
 
 
 <node name="schunk_driver" pkg="$(arg pkg_name)" type="schunk_driver_node" output="screen">
