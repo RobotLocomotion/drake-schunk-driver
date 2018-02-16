@@ -14,7 +14,7 @@ py_binary(
     srcs = ["lcm_logger.py"],
     deps = [
         ":lcm_adapter",
-        "//src:py_schunk_wsg_lcmtypes",
+        "@drake//lcmtypes:lcmtypes_py",
     ],
 )
 
@@ -23,6 +23,6 @@ py_binary(
     srcs = ["lcm_joystick_control.py"],
     deps = [
         ":lcm_adapter",
-        "//src:py_schunk_wsg_lcmtypes",
+        "@drake//lcmtypes:lcmtypes_py",
     ],
 )

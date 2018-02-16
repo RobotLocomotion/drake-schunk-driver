@@ -1,33 +1,27 @@
 # -*- python -*-
 
-# This file marks a workspace root for the Bazel build system. see
-# http://bazel.io/ .
+workspace(name = "drake_iiwa_driver")
 
-workspace(name = "drake_schunk_driver")
+(DRAKE_COMMIT, DRAKE_CHECKSUM) = (
+    "604d013ea1fe0c874244c11d0a2df43bba054177",
+    "8068e5e152cc5ccbf178abcdf5b9e7164ec9bc87586a53dad1c735f6017215c6",
+)
+# Before changing the COMMIT, temporarily uncomment the next line so that Bazel
+# displays the suggested new value for the CHECKSUM.
+# DRAKE_CHECKSUM = "0" * 64
 
-load("//tools:github.bzl", "github_archive")
-load("//tools/third_party/kythe/tools/build_rules/config:pkg_config.bzl", "pkg_config_package")
-
-github_archive(
-    name = "gflags",
-    repository = "gflags/gflags",
-    commit = "a69b2544d613b4bee404988710503720c487119a",
-    sha256 = "8b3836d5ca34a2da4d6375cf5f2030c719b508ca16014fcc9d5e9b295b56a6c1",
+# Download a specific commit of Drake, from github.
+http_archive(
+    name = "drake",
+    sha256 = DRAKE_CHECKSUM,
+    strip_prefix = "drake-{}".format(DRAKE_COMMIT),
+    urls = [x.format(DRAKE_COMMIT) for x in [
+        "https://github.com/RobotLocomotion/drake/archive/{}.tar.gz",
+    ]],
 )
 
-pkg_config_package(
-    name = "glib",
-    modname = "glib-2.0",
-)
+load("@drake//tools/workspace:default.bzl", "add_default_repositories")
 
-pkg_config_package(
-    name = "python2",
-    modname = "python2",
-)
-
-new_git_repository(
-    name = "lcm",
-    remote = "https://github.com/lcm-proj/lcm.git",
-    commit = "9015dce5defd3902b1725bd091b80c0517774e40",
-    build_file = "tools/lcm.BUILD",
-)
+# WARNING: We allow `vtk`, but should take care to avoid linking in multiple
+# versions of VTK!
+add_default_repositories()
