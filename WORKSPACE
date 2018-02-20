@@ -1,6 +1,6 @@
 # -*- python -*-
 
-workspace(name = "drake_iiwa_driver")
+workspace(name = "drake_schunk_driver")
 
 (DRAKE_COMMIT, DRAKE_CHECKSUM) = (
     "604d013ea1fe0c874244c11d0a2df43bba054177",
