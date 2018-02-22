@@ -1,6 +1,5 @@
 #pragma once
 
-#include <cassert>
 #include <chrono>
 #include <cstring>
 #include <iostream>
@@ -128,10 +127,10 @@ class Wsg {
   bool SetForceLimit(double force) {
     WsgCommandMessage command(kSetForceLimit, {});
     command.AppendToPayload(static_cast<float>(force));
-    SendAndAwaitResponse(command, 0.1);
+    return !!SendAndAwaitResponse(command, 0.1);
   }
 
-  bool SetForceLimitNonblocking(double force) {
+  void SetForceLimitNonblocking(double force) {
     WsgCommandMessage command(kSetForceLimit, {});
     command.AppendToPayload(static_cast<float>(force));
     tx_.Send(command);
@@ -140,11 +139,12 @@ class Wsg {
   bool SetAcceleration(double acceleration_mm_per_ss) {
     WsgCommandMessage command(kSetAccel, {});
     command.AppendToPayload(static_cast<float>(acceleration_mm_per_ss));
-    SendAndAwaitResponse(command, 0.1);
+    return !!SendAndAwaitResponse(command, 0.1);
   }
 
   bool ClearSoftLimits() {
-    SendAndAwaitResponse(WsgCommandMessage(kClearSoftLimits, {}), 0.1);
+    return !!SendAndAwaitResponse(
+        WsgCommandMessage(kClearSoftLimits, {}), 0.1);
   }
 
   enum PrepositionStopMode {kPrepositionClampOnBlock = 0,
@@ -174,7 +174,6 @@ class Wsg {
 #ifdef DEBUG
     std::cout << "sending " << command.command() << " nonblocking" << std::endl;
 #endif
-    auto start_time = std::chrono::system_clock::now();
     tx_.Send(command);
   }
 
@@ -202,7 +201,9 @@ class Wsg {
     // Here, 1 == always send automatic updates.
     message.AppendToPayload(static_cast<unsigned char>(1));
     message.AppendToPayload(update_period_ms);
-    assert(SendAndAwaitResponse(message, timeout));
+    if (!SendAndAwaitResponse(message, timeout)) {
+      throw std::runtime_error("Enabling updates failed");
+    }
   }
 
   WsgReturnReceiver& rx() { return rx_; }

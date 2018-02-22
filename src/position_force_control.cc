@@ -1,6 +1,5 @@
 #include "position_force_control.h"
 
-#include <cassert>
 #include <cmath>
 #include <cstring>
 
@@ -23,7 +22,7 @@ PositionForceControl::PositionForceControl(std::unique_ptr<Wsg> wsg)
     : wsg_(std::move(wsg)) {}
 
 
-StatusCode PositionForceControl::DoCalibrationSteps() {
+void PositionForceControl::DoCalibrationSteps() {
   // Set up periodic status updates on every available state structure.
   // We don't use all of these but we have bandwidth to spare and this
   // ensures we'll have them available in pcap debugging.

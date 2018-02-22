@@ -26,7 +26,7 @@ class PositionForceControl {
   /// Following this command, the fingers will be at their positive limit
   /// (fully open, with an ~110mm base separation, ~103mm finger separation
   /// with the default hard fingers) and zero target force.
-  StatusCode DoCalibrationSteps();
+  void DoCalibrationSteps();
 
   /// Sets the target position (in millimeters of base separation) and force
   /// (in Newtons, positive-outward).

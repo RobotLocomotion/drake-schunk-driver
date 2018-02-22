@@ -1,5 +1,6 @@
 #include <cassert>
 #include <ctime>
+#include <iostream>
 
 #include <math.h>
 #include <unistd.h>
@@ -52,7 +53,7 @@ class SchunkLcmClient {
 
   ~SchunkLcmClient() {}
 
-  bool Initialize() {
+  void Initialize() {
     pf_control_.DoCalibrationSteps();
     lcm_.subscribe(FLAGS_lcm_command_channel,
                    &SchunkLcmClient::HandleCommandMessage, this);
@@ -108,8 +109,9 @@ int main(int argc, char** argv) {
   gflags::ParseCommandLineFlags(&argc, &argv, true);
 
   schunk_driver::SchunkLcmClient client;
-  assert(client.Initialize());
-  while(true) {
+  client.Initialize();
+
+  while (true) {
     client.Task();
     // Note: too short of a sleep here can put the gripper into some
     // kind of error state.  The right thing to do is probably to
