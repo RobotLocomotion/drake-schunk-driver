@@ -1,6 +1,7 @@
 #include "wsg_return_receiver.h"
 
 #include <cassert>
+#include <cstdlib>
 #include <cstring>
 #include <iomanip>
 #include <iostream>
@@ -53,10 +54,12 @@ std::unique_ptr<WsgReturnMessage> WsgReturnReceiver::Receive() {
       std::cerr << "Error reading from UDP socket" << errno
                 << " " << strerror(errno) << std::endl;
       assert(read_size >= 0);
+      ::abort();
     }
   } else if (read_size == sizeof(buffer)) {
     std::cerr << "received unreasonably large datagram" << std::endl;
-    assert(read_size < sizeof(buffer));
+    assert(read_size < static_cast<int>(sizeof(buffer)));
+    ::abort();
   } else {
     std::vector<unsigned char> message_buffer(read_size);
     memcpy(message_buffer.data(), buffer, read_size);
