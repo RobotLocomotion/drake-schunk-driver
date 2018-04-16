@@ -46,6 +46,7 @@ void WsgCommandSender::Send(const WsgCommandMessage& msg) {
                               (struct sockaddr *) &gripper_sockaddr_,
                               sizeof(struct sockaddr_in));
   assert(send_result == data_to_send.size());
+  (void)(send_result);  // Avoid "unused" warning when assertions are off.
 #ifdef DEBUG
   std::cout << "  sent!" << std::endl;
 #endif
