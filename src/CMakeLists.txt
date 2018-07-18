@@ -23,10 +23,13 @@ include_directories("${HEADERS}")
 add_library(schunk_driver_library
 	"${SOURCES}")
 
+
+
 # target_include_directories(schunk_driver_library
 # 	PUBLIC "${HEADERS}")
 
 add_executable(schunk_driver_node schunk_driver_ros.cc)
+add_dependencies(schunk_driver_node ${catkin_EXPORTED_TARGETS})
 target_link_libraries(schunk_driver_node
 	schunk_driver_library
 	${catkin_LIBRARIES})

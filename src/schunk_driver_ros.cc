@@ -36,8 +36,8 @@
 //               "Topic to send ROS status messages on");
 
 namespace schunk_driver {
-/// This class implements an LCM endpoint that relays received LCM commands to
-/// the Wsg and receieved Wsg status back over LCM.
+/// This class implements a ROS endpoint that relays received LCM commands to
+/// the Wsg and receieved Wsg status back over ROS.
 class SchunkROSClient {
  public:
 
