@@ -2,9 +2,11 @@
 
 workspace(name = "drake_schunk_driver")
 
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
 (DRAKE_COMMIT, DRAKE_CHECKSUM) = (
-    "604d013ea1fe0c874244c11d0a2df43bba054177",
-    "8068e5e152cc5ccbf178abcdf5b9e7164ec9bc87586a53dad1c735f6017215c6",
+    "ad6246e7da1f14a266273ceb0f4d75b2871671a7",
+    "1285f664603634e13a6a89c8c11dfd11d83d57f204e4ee3b8ac84ad9e4127ef2",
 )
 # Before changing the COMMIT, temporarily uncomment the next line so that Bazel
 # displays the suggested new value for the CHECKSUM.
