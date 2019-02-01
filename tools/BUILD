@@ -14,7 +14,7 @@ py_binary(
     srcs = ["lcm_logger.py"],
     deps = [
         ":lcm_adapter",
-        "@drake//lcmtypes:lcmtypes_py",
+        "@drake//lcmtypes:lcmtypes_drake_py",
     ],
 )
 
@@ -23,6 +23,6 @@ py_binary(
     srcs = ["lcm_joystick_control.py"],
     deps = [
         ":lcm_adapter",
-        "@drake//lcmtypes:lcmtypes_py",
+        "@drake//lcmtypes:lcmtypes_drake_py",
     ],
 )
