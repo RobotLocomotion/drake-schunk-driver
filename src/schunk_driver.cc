@@ -100,7 +100,7 @@ class SchunkLcmClient {
   lcm::LCM lcm_;
   schunk_driver::PositionForceControl pf_control_;
   lcmt_schunk_wsg_status lcm_status_;
-  lcmt_schunk_wsg_command lcm_command_;
+  lcmt_schunk_wsg_command lcm_command_{};
 };
 }  // namespace schunk_driver
 
