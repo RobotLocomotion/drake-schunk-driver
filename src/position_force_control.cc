@@ -23,6 +23,10 @@ PositionForceControl::PositionForceControl(std::unique_ptr<Wsg> wsg)
 
 
 void PositionForceControl::DoCalibrationSteps() {
+  // Print the system info for the user and fail fast if contacting the
+  // gripper fails.  Result not currently used otherwise.
+  wsg_->GetSystemInfo();
+
   // Set up periodic status updates on every available state structure.
   // We don't use all of these but we have bandwidth to spare and this
   // ensures we'll have them available in pcap debugging.
@@ -50,6 +54,13 @@ void PositionForceControl::SetPositionAndForce(
     double commanded_position_mm, double commanded_force) {
   // Use the preposition command (which is SPECIFICALLY NOT INTENDED for this
   // use case) to emulate force control.
+
+  commanded_position_mm = std::min(
+      commanded_position_mm,
+      static_cast<double>(physical_limits_.stroke_mm_));
+  commanded_force = std::min(
+      commanded_force,
+      static_cast<double>(physical_limits_.overdrive_force_));
 
   bool must_recommand = false;
 

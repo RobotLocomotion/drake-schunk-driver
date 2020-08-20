@@ -12,6 +12,13 @@
 
 namespace schunk_driver {
 
+struct SystemInfo {
+  uint8_t type_{0};
+  uint8_t hwrev_{0};
+  uint16_t fw_version_{0};
+  uint32_t serial_number_{0};
+};
+
 struct PhysicalLimits {
   float stroke_mm_ {0};
   float min_speed_mm_per_s_ {0};
@@ -76,9 +83,37 @@ class Wsg {
     tx_.Send(WsgCommandMessage(kStop, {}));
   }
 
+  SystemInfo GetSystemInfo() {
+    auto info_msg = SendAndAwaitResponse(
+      WsgCommandMessage(kGetSystemInfo, {}), 0.1);
+    if (!info_msg) {
+      throw std::runtime_error("Getting system info failed.");
+    }
+
+    SystemInfo result;
+    auto info_data = info_msg->params().data();
+    memcpy(&result.type_, info_data + 0, sizeof(uint8_t));
+    memcpy(&result.hwrev_, info_data + 1, sizeof(uint8_t));
+    memcpy(&result.fw_version_, info_data + 2, sizeof(uint16_t));
+    memcpy(&result.serial_number_, info_data + 4, sizeof(uint32_t));
+
+    std::cout << "System info:\n";
+    std::cout << "type: " << static_cast<int>(result.type_) << " ";
+    std::cout << "hwrev: " << static_cast<int>(result.hwrev_) << " ";
+    std::cout << "fw_version: 0x" << std::hex << result.fw_version_
+              << std::dec << " ";
+    std::cout << "serial: " << result.serial_number_ << "\n";
+    return result;
+  }
+
   PhysicalLimits GetPhysicalLimits() {
     auto limits_msg = SendAndAwaitResponse(
       WsgCommandMessage(kGetSystemLimits, {}), 0.1);
+
+    if (!limits_msg) {
+      throw std::runtime_error("Getting physical limits failed.");
+    }
+
     PhysicalLimits result;
     auto limits_data = limits_msg->params().data();
     memcpy(&result.stroke_mm_, limits_data + 0, sizeof(float));
@@ -89,6 +124,16 @@ class Wsg {
     memcpy(&result.min_force_, limits_data + 20, sizeof(float));
     memcpy(&result.nominal_force_, limits_data + 24, sizeof(float));
     memcpy(&result.overdrive_force_, limits_data + 28, sizeof(float));
+
+    std::cout << "Physical limits:\n";
+    std::cout << "stroke: " << result.stroke_mm_ << "\n";
+    std::cout << "min_speed: " << result.min_speed_mm_per_s_ << " ";
+    std::cout << "max_speed: " << result.max_speed_mm_per_s_ << "\n";
+    std::cout << "min_acc: " << result.min_acc_mm_per_ss_ << " ";
+    std::cout << "max_acc: " << result.max_acc_mm_per_ss_ << "\n";
+    std::cout << "min_force: " << result.min_force_ << " ";
+    std::cout << "nominal_force: " << result.nominal_force_ << " ";
+    std::cout << "overdrive_force: " << result.overdrive_force_ << "\n";
     return result;
   }
 
