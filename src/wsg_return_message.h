@@ -89,7 +89,7 @@ class WsgReturnMessage {
 
   int command() const { return command_; }
   int status() const { return status_; }
-  const std::vector<unsigned char> params() const { return params_; }
+  const std::vector<unsigned char>& params() const { return params_; }
 
   static std::unique_ptr<WsgReturnMessage> Parse(
       std::vector<unsigned char>& buffer);
