@@ -25,5 +25,6 @@ cc_binary(
     deps = [
         "@drake//lcmtypes:schunk",
         "@gflags//:gflags",
+        "@lcm//:lcm",
     ]
 )
