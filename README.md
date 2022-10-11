@@ -1,11 +1,24 @@
 # drake-schunk-driver
 Driver software for the Schunk gripper.
 
+## Prereqs
+
+This effectively requires the source prequisites of Drake. For using on
+Ubuntu, you may need to do something like:
+
+```sh
+git clone -o upstream https://github.com/RobotLocomotion/drake -b v1.9.0
+cd drake
+sudo ./setup/ubuntu/install_prereqs.sh
+```
+
 ## Building
 
 To build:
 
-  bazel build //...
+```sh
+bazel build //...
+```
 
 ## Configuring the gripper
 
