@@ -5,12 +5,13 @@ workspace(name = "drake_schunk_driver")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 (DRAKE_COMMIT, DRAKE_CHECKSUM) = (
-    "v1.9.0",
-    "a80a38d51bf2608489f7b44a882d00b76dac9765590afbfcf0c17090c16501ab",
+    "v1.20.0",
+    "e343bc558f840be17c05053c6fc3fff899a3bf4540f3b285f6cd7ca5937f7b46",
 )
 # Before changing the COMMIT, temporarily uncomment the next line so that Bazel
 # displays the suggested new value for the CHECKSUM.
 # DRAKE_CHECKSUM = "0" * 64
+DRAKE_STRIP_PREFIX = "drake-1.20.0"
 
 # Or to build against a local checkout of Drake, at the bash prompt set an
 # environment variable before building:
@@ -27,7 +28,7 @@ load("@environ//:environ.bzl", SCHUNK_LOCAL_DRAKE_PATH = "SCHUNK_LOCAL_DRAKE_PAT
 http_archive(
     name = "drake" if not SCHUNK_LOCAL_DRAKE_PATH else "drake_ignored",
     sha256 = DRAKE_CHECKSUM,
-    strip_prefix = "drake-{}".format(DRAKE_COMMIT),
+    strip_prefix = DRAKE_STRIP_PREFIX,
     urls = [x.format(DRAKE_COMMIT) for x in [
         "https://github.com/RobotLocomotion/drake/archive/{}.tar.gz",
     ]],
